@@ -49,7 +49,7 @@ class _InvoiceAnalyzerState extends State<InvoiceAnalyzer> {
     try {
       final uri = Uri.parse('https://api.openai.com/v1/images/analyze'); // Update with actual endpoint
       final request = http.MultipartRequest('POST', uri)
-        ..headers['Authorization'] = 'Bearer YOUR_OPENAI_API_KEY'
+        ..headers['Authorization'] = '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'
         ..files.add(http.MultipartFile.fromBytes('file', selectedFile!.bytes!, filename: selectedFile!.name));
 
       final response = await request.send();
