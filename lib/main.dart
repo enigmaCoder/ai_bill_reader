@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'dart:convert';
-import 'package:http/http.dart' as http;
+
+import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
+import 'dart:js' as js;
 
 void main() {
   runApp(MyApp());
@@ -47,23 +48,26 @@ class _InvoiceAnalyzerState extends State<InvoiceAnalyzer> {
     });
 
     try {
-      final uri = Uri.parse('https://api.openai.com/v1/images/analyze'); // Update with actual endpoint
-      final request = http.MultipartRequest('POST', uri)
-        ..headers['Authorization'] = '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'
-        ..files.add(http.MultipartFile.fromBytes('file', selectedFile!.bytes!, filename: selectedFile!.name));
+      final encodedFile = base64Encode(selectedFile!.bytes!);
 
-      final response = await request.send();
-      if (response.statusCode == 200) {
-        final responseData = await response.stream.bytesToString();
-        setState(() {
-          extractedData = json.decode(responseData);
-        });
-      } else {
-        showError('Failed to analyze the invoice. Please try again.');
-      }
+      // Pass the encoded file to the JavaScript function for analysis
+      js.context.callMethod('analyzeInvoice', [
+        encodedFile,
+        js.JsFunction.withThis((_, String responseJson) {
+          setState(() {
+            extractedData = Map<String, dynamic>.from(json.decode(responseJson));
+            isLoading = false;
+          });
+        }),
+        js.JsFunction.withThis((_, String errorMessage) {
+          showError(errorMessage);
+          setState(() {
+            isLoading = false;
+          });
+        })
+      ]);
     } catch (e) {
       showError('An error occurred: $e');
-    } finally {
       setState(() {
         isLoading = false;
       });

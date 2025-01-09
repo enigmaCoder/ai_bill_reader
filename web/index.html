@@ -1,5 +1,25 @@
 <!DOCTYPE html>
 <html>
+<script>
+  function analyzeInvoice(encodedFile, onSuccess, onError) {
+    fetch('https://api.openai.com/v1/images/analyze', {
+      method: 'POST',
+      headers: {
+        'Authorization': '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',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ file: encodedFile }),
+    })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to analyze the invoice');
+        }
+        return response.json();
+      })
+      .then(data => onSuccess(JSON.stringify(data)))
+      .catch(error => onError(error.message));
+  }
+</script>s
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
